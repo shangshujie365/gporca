@@ -153,6 +153,10 @@ namespace gpopt
 							)
 							const;
 
+			// searches for a ScalarIdent expression with 0 or more ScalarCoerceViaIO parents
+			static
+			CExpression *PexprFindScalarIdentUnderCasts(CExpression *pexpr);
+
 			// subset of the given constraints, which reference the given column
 			static
 			DrgPcnstr *PdrgpcnstrOnColumn(IMemoryPool *pmp, DrgPcnstr *pdrgpcnstr, CColRef *pcr, BOOL fExclusive);

@@ -66,7 +66,7 @@ const WCHAR *CConstraintTest::wszInternalRepresentationFor2012_01_02 =
 const WCHAR *CConstraintTest::wszInternalRepresentationFor2012_01_22 =
 		GPOS_WSZ_LIT("MhEAAA==");
 
-static GPOS_RESULT EresUnittest_CConstraintIntervalFromArrayExprIncludesNull();
+//static GPOS_RESULT EresUnittest_CConstraintIntervalFromArrayExprIncludesNull();
 
 //---------------------------------------------------------------------------
 //	@function:
@@ -81,28 +81,68 @@ CConstraintTest::EresUnittest()
 {
 	CUnittest rgut[] =
 		{
-		GPOS_UNITTEST_FUNC(EresUnittest_CConstraintIntervalFromArrayExprIncludesNull),
-		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CInterval),
-		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CIntervalFromScalarExpr),
-		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CConjunction),
-		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CDisjunction),
-		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CNegation),
-		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CConstraintFromScalarExpr),
-		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CConstraintIntervalConvertsTo),
-		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CConstraintIntervalPexpr),
-		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CConstraintIntervalFromArrayExpr),
-#ifdef GPOS_DEBUG
-		GPOS_UNITTEST_FUNC_THROW
-			(
-			CConstraintTest::EresUnittest_NegativeTests,
-			gpos::CException::ExmaSystem,
-			gpos::CException::ExmiAssert
-			),
-#endif // GPOS_DEBUG
-		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_ConstraintsOnDates),
+		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CCast),
+//		GPOS_UNITTEST_FUNC(EresUnittest_CConstraintIntervalFromArrayExprIncludesNull),
+//		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CInterval),
+//		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CIntervalFromScalarExpr),
+//		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CConjunction),
+//		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CDisjunction),
+//		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CNegation),
+//		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CConstraintFromScalarExpr),
+//		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CConstraintIntervalConvertsTo),
+//		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CConstraintIntervalPexpr),
+//		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_CConstraintIntervalFromArrayExpr),
+//#ifdef GPOS_DEBUG
+//		GPOS_UNITTEST_FUNC_THROW
+//			(
+//			CConstraintTest::EresUnittest_NegativeTests,
+//			gpos::CException::ExmaSystem,
+//			gpos::CException::ExmiAssert
+//			),
+//#endif // GPOS_DEBUG
+//		GPOS_UNITTEST_FUNC(CConstraintTest::EresUnittest_ConstraintsOnDates),
 		};
 
 	return CUnittest::EresExecute(rgut, GPOS_ARRAY_SIZE(rgut));
+}
+
+//---------------------------------------------------------------------------
+//	@function:
+//		CConstraintTest::EresUnittest_CInterval
+//
+//	@doc:
+//		Interval tests
+//
+//---------------------------------------------------------------------------
+GPOS_RESULT
+CConstraintTest::EresUnittest_CCast()
+{
+	// create memory pool
+	CAutoMemoryPool amp;
+	IMemoryPool *pmp = amp.Pmp();
+
+	// setup a file-based provider
+	CMDProviderMemory *pmdp = CTestUtils::m_pmdpf;
+	pmdp->AddRef();
+	CMDAccessor mda(pmp, CMDCache::Pcache(), CTestUtils::m_sysidDefault, pmdp);
+
+	CConstExprEvaluatorForDates *pceeval = GPOS_NEW(pmp) CConstExprEvaluatorForDates(pmp);
+
+	// install opt context in TLS
+	CAutoOptCtxt aoc(pmp, &mda, pceeval, CTestUtils::Pcm(pmp));
+	GPOS_ASSERT(NULL != COptCtxt::PoctxtFromTLS()->Pcomp());
+
+	CExpression *pexpr = CTestUtils::PexprLogical2AryJoinWithCast(pmp);
+	CExpression *pexprScalarChild = (*pexpr)[2];
+	DrgPcrs *pdrgpcrs = NULL;
+	CConstraint *pcnstr = CConstraint::PcnstrFromScalarExpr(pmp, pexprScalarChild, &pdrgpcrs);
+	GPOS_ASSERT(NULL != pdrgpcrs && 1 == pdrgpcrs->UlLength());
+	GPOS_ASSERT(NULL != pcnstr);
+
+	pcnstr->Release();
+	pdrgpcrs->Release();
+	pexpr->Release();
+	return GPOS_OK;
 }
 
 //---------------------------------------------------------------------------

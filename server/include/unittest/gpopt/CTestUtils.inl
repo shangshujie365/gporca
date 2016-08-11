@@ -126,6 +126,18 @@ namespace gpopt
 		CDrvdPropRelational *pdprelRight = CDrvdPropRelational::Pdprel(pexprRight->PdpDerive());
 		CColRef *pcrRight = pdprelRight->PcrsOutput()->PcrAny();
 		CExpression *pexprEquality = CUtils::PexprScalarEqCmp(pmp, pcrLeft, pcrRight);
+		
+		// if the types aren't equal, create a cast
+		// hey omer, why does this assert not fail in our test case?
+
+		GPOS_ASSERT(pcrLeft->Pmdtype()->Pmdid()->FEquals(pcrRight->Pmdtype()->Pmdid()));
+		{
+			CAutoTrace at(pmp);
+			at.Os() << "pcrLeft: ";
+			pcrLeft->Pmdtype()->Pmdid()->OsPrint(at.Os());
+			at.Os() << "\n";
+			pcrRight->Pmdtype()->Pmdid()->OsPrint(at.Os());
+		}
 
 		return CUtils::PexprLogicalJoin<T>(pmp, pexprLeft, pexprRight, pexprEquality);
 	}

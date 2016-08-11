@@ -191,15 +191,25 @@ namespace gpopt
 
 			// generate a plain table descriptor
 			static
-			CTableDescriptor *PtabdescPlain(IMemoryPool *pmp, ULONG ulCols, IMDId *pmdid, const CName &nameTable, BOOL fNullable = false);
+			CTableDescriptor *PtabdescPlain(IMemoryPool *pmp, ULONG ulCols, IMDId *pmdid, const CName &nameTable, BOOL fNullable, const IMDType *pmdtype);
+
+			static
+			CTableDescriptor *PtabdescPlain(IMemoryPool *pmp, ULONG ulCols, IMDId *pmdid, const CName &nameTable);
 
 			// generate a plain table descriptor, where the column names are generated using a format string containing %d
 			static
-			CTableDescriptor *PtabdescPlainWithColNameFormat(IMemoryPool *pmp, ULONG ulCols, IMDId *pmdid, const WCHAR *wszColNameFormat, const CName &nameTable, BOOL fNullable = false);
+			CTableDescriptor *PtabdescPlainWithColNameFormat(IMemoryPool *pmp, ULONG ulCols, IMDId *pmdid, const WCHAR *wszColNameFormat, const CName &nameTable, BOOL fNullable = false, const IMDType *pmdtype = NULL);
+
+			// generate a plain table descriptor, where the column names are generated using a format string containing %d
+			static
+			CTableDescriptor *PtabdescPlainWithColNameFormatHelper(IMemoryPool *pmp, ULONG ulCols, IMDId *pmdid, const WCHAR *wszColNameFormat, const CName &nameTable, BOOL fNullable, const IMDType *pmdtype);
 
 			// generate a table descriptor
 			static
-			CTableDescriptor *PtabdescCreate(IMemoryPool *pmp, ULONG ulCols, IMDId *pmdid, const CName &name, BOOL fPartitioned = false);
+			CTableDescriptor *PtabdescCreate(IMemoryPool *pmp, ULONG ulCols, IMDId *pmdid, const CName &name, BOOL fPartitioned, const IMDType *pmdtype);
+
+			static
+			CTableDescriptor *PtabdescCreate(IMemoryPool *pmp, ULONG ulCols, IMDId *pmdid, const CName &name);
 
 			// generate a get expression
 			static
@@ -364,6 +374,9 @@ namespace gpopt
 			// generate an n-ary join expression
 			static
 			CExpression *PexprLogicalNAryJoin(IMemoryPool *pmp, DrgPexpr *pdrgpexpr);
+
+			static
+			CExpression *PexprLogical2AryJoinWithCast(IMemoryPool *pmp);
 
 			// generate an n-ary join expression using given array of relation names
 			static

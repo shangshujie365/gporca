@@ -339,6 +339,37 @@ CConstraint::AddColumnToEquivClasses
 
 //---------------------------------------------------------------------------
 //	@function:
+//		CConstraint::PexprFindScalarIdentUnderCasts
+//
+//	@doc:
+//		Find a scalar identity child under a cast operator. Can have zero or
+//		more casts as parents.
+//
+//---------------------------------------------------------------------------
+CExpression *
+CConstraint::PexprFindScalarIdentUnderCasts
+		(
+				CExpression *pexpr
+		)
+{
+	GPOS_ASSERT(NULL != pexpr);
+	if (COperator::EopScalarIdent == pexpr->Pop()->Eopid())
+	{
+		return pexpr;
+	}
+	else if (COperator::EopScalarCoerceViaIO == pexpr->Pop()->Eopid() &&
+				1 == pexpr->UlArity())
+	{
+		return PexprFindScalarIdentUnderCasts((*pexpr)[0]);
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+//---------------------------------------------------------------------------
+//	@function:
 //		CConstraint::PcnstrFromScalarCmp
 //
 //	@doc:
@@ -361,15 +392,16 @@ CConstraint::PcnstrFromScalarCmp
 	CExpression *pexprLeft = (*pexpr)[0];
 	CExpression *pexprRight = (*pexpr)[1];
 
-	// check if the scalar comparison is over scalar idents
-	if (COperator::EopScalarIdent == pexprLeft->Pop()->Eopid()
-		&& COperator::EopScalarIdent == pexprRight->Pop()->Eopid())
-	{
-		CScalarIdent *popScIdLeft = CScalarIdent::PopConvert((*pexpr)[0]->Pop());
-		const CColRef *pcrLeft =  popScIdLeft->Pcr();
+	CExpression *pexprScIdLeft = PexprFindScalarIdentUnderCasts(pexprLeft);
+	CExpression *pexprScIdRight = PexprFindScalarIdentUnderCasts(pexprRight);
 
-		CScalarIdent *popScIdRight = CScalarIdent::PopConvert((*pexpr)[1]->Pop());
-		const CColRef *pcrRight =  popScIdRight->Pcr();
+	if (NULL != pexprScIdLeft && NULL != pexprScIdRight)
+	{
+		CScalarIdent *popScIdLeft = CScalarIdent::PopConvert(pexprScIdLeft->Pop());
+		const CColRef *pcrLeft = popScIdLeft->Pcr();
+
+		CScalarIdent *popScIdRight = CScalarIdent::PopConvert(pexprScIdRight->Pop());
+		const CColRef *pcrRight = popScIdRight->Pcr();
 
 		if (!CUtils::FConstrainableType(pcrLeft->Pmdtype()->Pmdid()) ||
 			!CUtils::FConstrainableType(pcrRight->Pmdtype()->Pmdid()))
@@ -394,8 +426,6 @@ CConstraint::PcnstrFromScalarCmp
 		pdrgpcnstr->Append(CConstraintInterval::PciUnbounded(pmp, pcrRight, false /*fIncludesNull*/));
 		return CConstraint::PcnstrConjunction(pmp, pdrgpcnstr);
 	}
-
-	// TODO: , May 28, 2012; add support for other cases besides (col cmp col)
 
 	return NULL;
 }

@@ -159,6 +159,7 @@ namespace gpopt
 
 			// unittests
 			static GPOS_RESULT EresUnittest();
+			static GPOS_RESULT EresUnittest_CCast();
 			static GPOS_RESULT EresUnittest_CInterval();
 			static GPOS_RESULT EresUnittest_CIntervalFromScalarExpr();
 			static GPOS_RESULT EresUnittest_CConjunction();

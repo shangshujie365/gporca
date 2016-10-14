@@ -158,6 +158,11 @@ CDistributionSpecHashed::FSatisfies
 	}
 	
 	GPOS_ASSERT(EdtHashed == pds->Edt());
+
+	if(Edt() == CDistributionSpec::EdtStrictHashed && pds->Edt() != CDistributionSpec::EdtStrictHashed)
+	{
+		return false;
+	}
 	
 	const CDistributionSpecHashed *pdsHashed =
 			dynamic_cast<const CDistributionSpecHashed *>(pds);

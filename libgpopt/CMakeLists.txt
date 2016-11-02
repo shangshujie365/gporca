@@ -512,6 +512,8 @@ add_library(gpopt
             src/operators/CScalarAggFunc.cpp
             include/gpopt/operators/CScalarArray.h
             src/operators/CScalarArray.cpp
+	    include/gpopt/operators/CScalarConstArray.h
+	    src/operators/CScalarConstArray.cpp
             include/gpopt/operators/CScalarArrayCmp.h
             src/operators/CScalarArrayCmp.cpp
             include/gpopt/operators/CScalarArrayRef.h
@@ -894,8 +896,7 @@ add_library(gpopt
             include/gpopt/base/CDatumSortedSet.h
             src/base/CDatumSortedSet.cpp
             include/gpopt/base/CDistributionSpecHashedNoOp.h
-            src/base/CDistributionSpecHashedNoOp.cpp
-            )
+            src/base/CDistributionSpecHashedNoOp.cpp)
 
 target_link_libraries(gpopt
                       gpdbcost

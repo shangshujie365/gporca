@@ -187,6 +187,7 @@ namespace gpopt
 				EopScalarCoerceViaIO,
 				EopScalarCoalesce,
 				EopScalarArray,
+				EopScalarConstArray,
 				EopScalarArrayCmp,
 				EopScalarArrayRef,
 				EopScalarArrayRefIndexList,
